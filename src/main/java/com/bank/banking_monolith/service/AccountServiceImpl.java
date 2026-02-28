@@ -5,6 +5,7 @@ import com.bank.banking_monolith.entity.Account;
 import com.bank.banking_monolith.entity.User;
 import com.bank.banking_monolith.repository.AccountRepository;
 import com.bank.banking_monolith.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,30 @@ public class AccountServiceImpl implements AccountService {
 
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
+    }
+
+    @Transactional
+    @Override
+    public void deposit(Long accountId, BigDecimal amount) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        account.setBalance(account.getBalance().add(amount));
+        accountRepository.save(account);
+    }
+
+    @Transactional
+    @Override
+    public void withdraw(Long accountId, BigDecimal amount) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("Insufficient funds");
+        }
+
+        account.setBalance(account.getBalance().subtract(amount));
+        accountRepository.save(account);
     }
 
     private String generateAccountNumber() {
