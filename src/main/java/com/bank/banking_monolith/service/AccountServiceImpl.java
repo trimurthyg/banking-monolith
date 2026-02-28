@@ -45,8 +45,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public void deposit(Long accountId, BigDecimal amount) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        Account account = accountRepository.findByIdForUpdate(accountId);
 
         account.setBalance(account.getBalance().add(amount));
         accountRepository.save(account);
@@ -55,8 +54,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public void withdraw(Long accountId, BigDecimal amount) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        Account account = accountRepository.findByIdForUpdate(accountId);
 
         if (account.getBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient funds");

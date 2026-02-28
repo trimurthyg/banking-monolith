@@ -10,4 +10,5 @@ public class TransferRequest {
     private Long fromAccountId;
     private Long toAccountId;
     private BigDecimal amount;
+    private String referenceId;
 }

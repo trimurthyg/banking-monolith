@@ -23,11 +23,15 @@ public class TransferServiceImpl implements TransferService {
     @Override
     public void transferMoney(TransferRequest request) {
 
-        Account sender = accountRepository.findById(request.getFromAccountId())
-                .orElseThrow(() -> new RuntimeException("Sender account not found"));
+        // IDEMPOTENCY CHECK
+        transactionRepository.findByReferenceId(request.getReferenceId())
+                .ifPresent(txn -> {
+                    throw new RuntimeException("Transaction already processed");
+                });
 
-        Account receiver = accountRepository.findById(request.getToAccountId())
-                .orElseThrow(() -> new RuntimeException("Receiver account not found"));
+        Account sender = accountRepository.findByIdForUpdate(request.getFromAccountId());
+
+        Account receiver = accountRepository.findByIdForUpdate(request.getToAccountId());
 
         if (sender.getBalance().compareTo(request.getAmount()) < 0) {
             throw new RuntimeException("Insufficient funds");
@@ -43,7 +47,7 @@ public class TransferServiceImpl implements TransferService {
         accountRepository.save(receiver);
 
         Transaction transaction = Transaction.builder()
-                .referenceId(UUID.randomUUID().toString())
+                .referenceId(request.getReferenceId())
                 .fromAccountId(sender.getId())
                 .toAccountId(receiver.getId())
                 .amount(request.getAmount())
