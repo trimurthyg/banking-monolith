@@ -2,18 +2,18 @@ spring:
   application:
     name: banking-monolith
 
-    datasource:
-      url: jdbc:postgresql://localhost:5432/bankdb
-      username: postgres
-      password: postgres
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bankdb
+    username: postgres
+    password: password
 
-      jpa:
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+      properties:
         hibernate:
-          ddl-auto: update
-        show-sql: true
-        properties:
-          hibernate:
-            format_sql: true
+          format_sql: true
 
-    server:
-      port: 8080
+server:
+  port: 8081
